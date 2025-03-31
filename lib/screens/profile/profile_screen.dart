@@ -1,4 +1,5 @@
 import 'package:book_store_2/screens/order/order_history.dart';
+import 'package:book_store_2/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
@@ -44,7 +45,7 @@ class ProfileScreen extends StatelessWidget {
               Center(child: Text(user.email ?? 'No email provided')),
               const SizedBox(height: 24),
             ],
-            
+
             // Profile Options Section
             Card(
               child: Column(
@@ -54,12 +55,14 @@ class ProfileScreen extends StatelessWidget {
                     title: const Text('My Orders'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () async {
-                      final orders = await Provider.of<OrderService>(context, listen: false)
+                      final orders = await Provider.of<OrderService>(context,
+                              listen: false)
                           .getUserOrders(authService.user!.uid);
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => OrderHistoryScreen(orders: orders),
+                          builder: (context) =>
+                              OrderHistoryScreen(orders: orders),
                         ),
                       );
                     },
@@ -71,15 +74,21 @@ class ProfileScreen extends StatelessWidget {
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () {
                       // TODO: Navigate to settings screen
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SettingsScreen(),
+                        ),
+                      );
                     },
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 16),
-            
+
             const Spacer(),
-            
+
             // Sign Out Button
             SizedBox(
               width: double.infinity,
