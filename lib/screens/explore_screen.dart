@@ -61,32 +61,13 @@ class _ExploreScreenState extends State<ExploreScreen> {
     );
   }
 
-  void _filterByCategory(String category) {
-    final bookService = Provider.of<BookService>(context, listen: false);
-    List<Book> filteredBooks;
-
-    if (category == 'All') {
-      filteredBooks = bookService.books;
-    } else if (category == 'Bestsellers') {
-      filteredBooks = bookService.books.where((b) => b.isBestseller).toList();
-    } else if (category == 'New Arrivals') {
-      filteredBooks = bookService.books
-          .where((b) => b.publishDate.isAfter(
-                DateTime.now().subtract(const Duration(days: 30)),
-              ))
-          .toList();
-    } else {
-      filteredBooks = bookService.books
-          .where((book) => book.genres.contains(category))
-          .toList();
-    }
-
+  void _navigateToCategoryScreen(String title, List<Book> books) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => CategoryBooksScreen(
-          category: category,
-          books: filteredBooks,
+          category: title,
+          books: books,
         ),
       ),
     );
@@ -101,6 +82,14 @@ class _ExploreScreenState extends State<ExploreScreen> {
               DateTime.now().subtract(const Duration(days: 30)),
             ))
         .toList();
+
+    // Extract all unique genres
+    final allGenres =
+        bookService.books.expand((book) => book.genres).toSet().toList();
+
+    // Extract all unique authors
+    final allAuthors =
+        bookService.books.map((book) => book.author).toSet().toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -136,15 +125,12 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     ),
                   ),
 
-                  // Categories Section
-                  const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Text(
-                      'Categories',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  // Genres Section
+                  SectionHeader(
+                    title: 'Browse by Genre',
+                    onSeeAll: () => _navigateToCategoryScreen(
+                      'All Genres',
+                      bookService.books,
                     ),
                   ),
                   SizedBox(
@@ -153,30 +139,59 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       scrollDirection: Axis.horizontal,
                       children: [
                         CategoryCard(
-                          name: 'All Books',
-                          icon: Icons.book,
-                          onTap: () => _filterByCategory('All'),
+                          name: 'All Genres',
+                          icon: Icons.category,
+                          onTap: () => _navigateToCategoryScreen(
+                            'All Genres',
+                            bookService.books,
+                          ),
                         ),
+                        ...allGenres.take(5).map((genre) => CategoryCard(
+                              name: genre,
+                              icon: Icons.local_offer,
+                              onTap: () => _navigateToCategoryScreen(
+                                genre,
+                                bookService.books
+                                    .where(
+                                        (book) => book.genres.contains(genre))
+                                    .toList(),
+                              ),
+                            )),
+                      ],
+                    ),
+                  ),
+
+                  // Authors Section
+                  SectionHeader(
+                    title: 'Browse by Author',
+                    onSeeAll: () => _navigateToCategoryScreen(
+                      'All Authors',
+                      bookService.books,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 100,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
                         CategoryCard(
-                          name: 'Horror',
-                          icon: Icons.holiday_village,
-                          onTap: () => _filterByCategory('Horror'),
+                          name: 'All Authors',
+                          icon: Icons.people,
+                          onTap: () => _navigateToCategoryScreen(
+                            'All Authors',
+                            bookService.books,
+                          ),
                         ),
-                        CategoryCard(
-                          name: 'Comics',
-                          icon: Icons.auto_awesome,
-                          onTap: () => _filterByCategory('Comics'),
-                        ),
-                        CategoryCard(
-                          name: 'History',
-                          icon: Icons.history,
-                          onTap: () => _filterByCategory('History'),
-                        ),
-                        CategoryCard(
-                          name: 'Fiction',
-                          icon: Icons.auto_stories,
-                          onTap: () => _filterByCategory('Fiction'),
-                        ),
+                        ...allAuthors.take(5).map((author) => CategoryCard(
+                              name: author,
+                              icon: Icons.person,
+                              onTap: () => _navigateToCategoryScreen(
+                                author,
+                                bookService.books
+                                    .where((book) => book.author == author)
+                                    .toList(),
+                              ),
+                            )),
                       ],
                     ),
                   ),
@@ -184,14 +199,20 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   // Best Selling Section
                   SectionHeader(
                     title: 'Best Selling Books',
-                    onSeeAll: () => _filterByCategory('Bestsellers'),
+                    onSeeAll: () => _navigateToCategoryScreen(
+                      'Bestsellers',
+                      bestsellers,
+                    ),
                   ),
                   _buildBookList(bestsellers),
 
                   // New Arrivals Section
                   SectionHeader(
                     title: 'New Arrivals',
-                    onSeeAll: () => _filterByCategory('New Arrivals'),
+                    onSeeAll: () => _navigateToCategoryScreen(
+                      'New Arrivals',
+                      newArrivals,
+                    ),
                   ),
                   _buildBookList(newArrivals),
                 ],

@@ -3,17 +3,18 @@ import 'package:flutter/material.dart';
 class CategoryCard extends StatelessWidget {
   final String name;
   final IconData icon;
-  
+
   const CategoryCard({
     super.key,
     required this.name,
-    required this.icon, required void Function() onTap,
+    required this.icon,
+    required void Function() onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 100,
+      width: 150,
       margin: const EdgeInsets.symmetric(horizontal: 8),
       child: Card(
         child: Padding(
