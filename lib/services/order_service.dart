@@ -2,7 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import '../models/cart_item.dart';
-import '../models/order.dart' show DeliveryStatus, Order; // Import only Order to avoid conflict
+import '../models/order.dart'
+    show DeliveryStatus, Order; // Import only Order to avoid conflict
 import '../models/order_enums.dart' as orderEnums; // Aliased import
 
 class DeliveryUpdate {
@@ -29,7 +30,8 @@ class DeliveryUpdate {
 }
 
 class OrderService with ChangeNotifier {
-  final firestore.FirebaseFirestore _firestore = firestore.FirebaseFirestore.instance;
+  final firestore.FirebaseFirestore _firestore =
+      firestore.FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   String get currentUserId => _auth.currentUser?.uid ?? '';
@@ -110,6 +112,7 @@ class OrderService with ChangeNotifier {
     }
   }
 
+  // In OrderService
   Future<void> updateDeliveryStatus({
     required String orderId,
     required String userId,
@@ -118,34 +121,35 @@ class OrderService with ChangeNotifier {
     String? message,
   }) async {
     try {
-      final update = DeliveryUpdate(
-        timestamp: DateTime.now(),
-        status: orderEnums.DeliveryStatus.values.byName(newStatus.name), // Convert to correct type
-        location: location,
-        message: message,
-      );
+      debugPrint('Updating status for order $orderId to $newStatus');
 
-      await _firestore.runTransaction((transaction) async {
-        final userOrderRef = _firestore
-            .collection('users')
-            .doc(userId)
-            .collection('orders')
-            .doc(orderId);
+      final update = {
+        'deliveryStatus': newStatus.toString().split('.').last,
+        'updatedAt': firestore.FieldValue.serverTimestamp(),
+      };
 
-        final mainOrderRef = _firestore.collection('orders').doc(orderId);
+      if (message != null) {
+        update['deliveryUpdates'] = firestore.FieldValue.arrayUnion([
+          {
+            'timestamp': firestore.FieldValue.serverTimestamp(),
+            'status': newStatus.toString().split('.').last,
+            'message': message,
+            'location': location,
+          }
+        ]);
+      }
 
-        final updateData = {
-          'deliveryStatus': newStatus.name, // Using .name
-          'deliveryUpdates': firestore.FieldValue.arrayUnion([update.toMap()]),
-        };
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('orders')
+          .doc(orderId)
+          .update(update);
 
-        transaction.update(userOrderRef, updateData);
-        transaction.update(mainOrderRef, updateData);
-      });
-
-      notifyListeners();
-    } catch (e) {
-      debugPrint('Delivery status update failed: $e');
+      debugPrint('Status updated successfully');
+    } catch (e, stack) {
+      debugPrint('Error updating status: $e');
+      debugPrint('Stack trace: $stack');
       rethrow;
     }
   }
