@@ -1,7 +1,7 @@
+import 'package:book_store_2/screens/book/book_detail_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:book_store_2/models/book.dart';
+import '../models/book.dart';
 import '../widgets/book_card.dart';
-import 'book/book_detail_screen.dart';
 
 class CategoryBooksScreen extends StatelessWidget {
   final String category;
@@ -19,24 +19,30 @@ class CategoryBooksScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(category),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: books.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: BookCard(
-              book: books[index],
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BookDetailScreen(book: books[index]),
-                ),
+      body: books.isEmpty
+          ? const Center(child: Text('No books in this category'))
+          : GridView.builder(
+              padding: const EdgeInsets.all(16),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 0.6,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
               ),
+              itemCount: books.length,
+              itemBuilder: (context, index) {
+                final book = books[index];
+                return BookCard(
+                  book: book,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BookDetailScreen(book: book),
+                    ),
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
     );
   }
 }

@@ -8,15 +8,6 @@ import '../widgets/section_header.dart';
 import 'book/book_detail_screen.dart';
 import 'category_books_screen.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const ExploreScreen();
-  }
-}
-
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
 
@@ -73,6 +64,59 @@ class _ExploreScreenState extends State<ExploreScreen> {
     );
   }
 
+  Widget _buildCategorySection(
+      String title, List<String> categories, IconData icon) {
+    final bookService = Provider.of<BookService>(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionHeader(
+          title: title,
+          onSeeAll: () => _navigateToCategoryScreen(
+            'All ${title.replaceFirst('Browse by ', '')}',
+            title == 'Browse by Genre' ? bookService.books : bookService.books,
+          ),
+        ),
+        SizedBox(
+          height: 100,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: [
+              // "All" category card
+              CategoryCard(
+                name: 'All',
+                icon: icon,
+                onTap: () => _navigateToCategoryScreen(
+                  'All ${title.replaceFirst('Browse by ', '')}',
+                  title == 'Browse by Genre'
+                      ? bookService.books
+                      : bookService.books,
+                ),
+              ),
+              // Individual category cards
+              ...categories.map((category) => CategoryCard(
+                    name: category,
+                    icon: icon,
+                    onTap: () {
+                      final filteredBooks = title == 'Browse by Genre'
+                          ? bookService.books
+                              .where((book) => book.genres.contains(category))
+                              .toList()
+                          : bookService.books
+                              .where((book) => book.author == category)
+                              .toList();
+
+                      _navigateToCategoryScreen(category, filteredBooks);
+                    },
+                  )),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bookService = Provider.of<BookService>(context);
@@ -83,11 +127,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
             ))
         .toList();
 
-    // Extract all unique genres
+    // Get all unique genres
     final allGenres =
         bookService.books.expand((book) => book.genres).toSet().toList();
 
-    // Extract all unique authors
+    // Get all unique authors
     final allAuthors =
         bookService.books.map((book) => book.author).toSet().toList();
 
@@ -102,7 +146,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Search bar
+                  // Search bar (keep existing)
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: GestureDetector(
@@ -126,77 +170,20 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   ),
 
                   // Genres Section
-                  SectionHeader(
-                    title: 'Browse by Genre',
-                    onSeeAll: () => _navigateToCategoryScreen(
-                      'All Genres',
-                      bookService.books,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 100,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        CategoryCard(
-                          name: 'All Genres',
-                          icon: Icons.category,
-                          onTap: () => _navigateToCategoryScreen(
-                            'All Genres',
-                            bookService.books,
-                          ),
-                        ),
-                        ...allGenres.take(5).map((genre) => CategoryCard(
-                              name: genre,
-                              icon: Icons.local_offer,
-                              onTap: () => _navigateToCategoryScreen(
-                                genre,
-                                bookService.books
-                                    .where(
-                                        (book) => book.genres.contains(genre))
-                                    .toList(),
-                              ),
-                            )),
-                      ],
-                    ),
+                  _buildCategorySection(
+                    'Browse by Genre',
+                    allGenres,
+                    Icons.category,
                   ),
 
                   // Authors Section
-                  SectionHeader(
-                    title: 'Browse by Author',
-                    onSeeAll: () => _navigateToCategoryScreen(
-                      'All Authors',
-                      bookService.books,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 100,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        CategoryCard(
-                          name: 'All Authors',
-                          icon: Icons.people,
-                          onTap: () => _navigateToCategoryScreen(
-                            'All Authors',
-                            bookService.books,
-                          ),
-                        ),
-                        ...allAuthors.take(5).map((author) => CategoryCard(
-                              name: author,
-                              icon: Icons.person,
-                              onTap: () => _navigateToCategoryScreen(
-                                author,
-                                bookService.books
-                                    .where((book) => book.author == author)
-                                    .toList(),
-                              ),
-                            )),
-                      ],
-                    ),
+                  _buildCategorySection(
+                    'Browse by Author',
+                    allAuthors,
+                    Icons.person,
                   ),
 
-                  // Best Selling Section
+                  // Best Selling Section (keep existing)
                   SectionHeader(
                     title: 'Best Selling Books',
                     onSeeAll: () => _navigateToCategoryScreen(
@@ -206,7 +193,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   ),
                   _buildBookList(bestsellers),
 
-                  // New Arrivals Section
+                  // New Arrivals Section (keep existing)
                   SectionHeader(
                     title: 'New Arrivals',
                     onSeeAll: () => _navigateToCategoryScreen(
