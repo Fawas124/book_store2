@@ -4,6 +4,7 @@ class Book {
   final String author;
   final String description;
   final String coverUrl;
+  final DateTime releaseDate;
   final double price;
   final List<String> genres;
   final DateTime publishDate;
@@ -17,6 +18,7 @@ class Book {
     required this.author,
     required this.description,
     required this.coverUrl,
+    required this.releaseDate,
     required this.price,
     required this.genres,
     required this.publishDate,
@@ -42,6 +44,9 @@ class Book {
       isBestseller: (json['averageRating']?.toDouble() ?? 0.0) > 4.5,
       rating: json['averageRating']?.toDouble() ?? 0.0,
       reviewCount: json['ratingsCount'] ?? 0,
+      releaseDate: json['releaseDate'] != null
+          ? DateTime.tryParse(json['releaseDate']) ?? DateTime.now()
+          : DateTime.now(),
     );
   }
 

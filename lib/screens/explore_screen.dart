@@ -16,12 +16,68 @@ class ExploreScreen extends StatefulWidget {
 }
 
 class _ExploreScreenState extends State<ExploreScreen> {
+  // Sorting state for each section
+  String _bestsellerSortBy = 'none';
+  bool _bestsellerAscending = true;
+  String _newArrivalSortBy = 'none';
+  bool _newArrivalAscending = true;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<BookService>(context, listen: false).fetchBooks();
     });
+  }
+
+  List<Book> _sortBooks(List<Book> books, String sortBy, bool ascending) {
+    List<Book> sortedBooks = List.from(books);
+    
+    switch (sortBy) {
+      case 'price':
+        sortedBooks.sort((a, b) => ascending 
+            ? a.price.compareTo(b.price) 
+            : b.price.compareTo(a.price));
+        break;
+      case 'rating':
+        sortedBooks.sort((a, b) => ascending 
+            ? a.rating.compareTo(b.rating) 
+            : b.rating.compareTo(a.rating));
+        break;
+      case 'releaseDate':
+        sortedBooks.sort((a, b) => ascending 
+            ? a.publishDate.compareTo(b.publishDate) 
+            : b.publishDate.compareTo(a.publishDate));
+        break;
+      default:
+        // No sorting
+        break;
+    }
+    
+    return sortedBooks;
+  }
+
+  PopupMenuButton<String> _buildSortButton(
+    String currentSortBy,
+    bool currentAscending,
+    Function(String) onSortChanged,
+  ) {
+    return PopupMenuButton<String>(
+      icon: Icon(Icons.sort, color: Colors.grey[700]),
+      itemBuilder: (context) => [
+        const PopupMenuItem(value: 'none', child: Text('Default Order')),
+        const PopupMenuItem(value: 'price', child: Text('Sort by Price')),
+        const PopupMenuItem(value: 'rating', child: Text('Sort by Rating')),
+        const PopupMenuItem(value: 'releaseDate', child: Text('Sort by Release Date')),
+      ],
+      onSelected: (value) {
+        if (value == currentSortBy) {
+          onSortChanged('none'); // Reset if same option selected
+        } else {
+          onSortChanged(value);
+        }
+      },
+    );
   }
 
   Widget _buildBookList(List<Book> books) {
@@ -75,7 +131,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
           title: title,
           onSeeAll: () => _navigateToCategoryScreen(
             'All ${title.replaceFirst('Browse by ', '')}',
-            title == 'Browse by Genre' ? bookService.books : bookService.books,
+            bookService.books,
           ),
         ),
         SizedBox(
@@ -89,9 +145,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 icon: icon,
                 onTap: () => _navigateToCategoryScreen(
                   'All ${title.replaceFirst('Browse by ', '')}',
-                  title == 'Browse by Genre'
-                      ? bookService.books
-                      : bookService.books,
+                  bookService.books,
                 ),
               ),
               // Individual category cards
@@ -120,12 +174,24 @@ class _ExploreScreenState extends State<ExploreScreen> {
   @override
   Widget build(BuildContext context) {
     final bookService = Provider.of<BookService>(context);
-    final bestsellers = bookService.books.where((b) => b.isBestseller).toList();
-    final newArrivals = bookService.books
-        .where((b) => b.publishDate.isAfter(
-              DateTime.now().subtract(const Duration(days: 30)),
-            ))
-        .toList();
+    
+    // Get and sort bestsellers
+    final bestsellers = _sortBooks(
+      bookService.books.where((b) => b.isBestseller).toList(),
+      _bestsellerSortBy,
+      _bestsellerAscending,
+    );
+    
+    // Get and sort new arrivals
+    final newArrivals = _sortBooks(
+      bookService.books
+          .where((b) => b.publishDate.isAfter(
+                DateTime.now().subtract(const Duration(days: 30)),
+              ))
+          .toList(),
+      _newArrivalSortBy,
+      _newArrivalAscending,
+    );
 
     // Get all unique genres
     final allGenres =
@@ -146,7 +212,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Search bar (keep existing)
+                  // Search bar
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: GestureDetector(
@@ -183,22 +249,38 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     Icons.person,
                   ),
 
-                  // Best Selling Section (keep existing)
+                  // Best Selling Section with sorting
                   SectionHeader(
                     title: 'Best Selling Books',
                     onSeeAll: () => _navigateToCategoryScreen(
                       'Bestsellers',
                       bestsellers,
                     ),
+                    trailing: _buildSortButton(
+                      _bestsellerSortBy,
+                      _bestsellerAscending,
+                      (value) => setState(() {
+                        _bestsellerSortBy = value;
+                        _bestsellerAscending = value != 'none';
+                      }),
+                    ),
                   ),
                   _buildBookList(bestsellers),
 
-                  // New Arrivals Section (keep existing)
+                  // New Arrivals Section with sorting
                   SectionHeader(
                     title: 'New Arrivals',
                     onSeeAll: () => _navigateToCategoryScreen(
                       'New Arrivals',
                       newArrivals,
+                    ),
+                    trailing: _buildSortButton(
+                      _newArrivalSortBy,
+                      _newArrivalAscending,
+                      (value) => setState(() {
+                        _newArrivalSortBy = value;
+                        _newArrivalAscending = value != 'none';
+                      }),
                     ),
                   ),
                   _buildBookList(newArrivals),

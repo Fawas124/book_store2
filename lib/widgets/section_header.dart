@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class SectionHeader extends StatelessWidget {
   final String title;
   final VoidCallback onSeeAll;
-  
+  final Widget? trailing;
+
   const SectionHeader({
     super.key,
     required this.title,
     required this.onSeeAll,
+    this.trailing,
   });
 
   @override
@@ -19,11 +21,16 @@ class SectionHeader extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: Theme.of(context).textTheme.titleLarge,
           ),
-          TextButton(
-            onPressed: onSeeAll,
-            child: const Text('See all >'),
+          Row(
+            children: [
+              if (trailing != null) trailing!,
+              TextButton(
+                onPressed: onSeeAll,
+                child: const Text('See All'),
+              ),
+            ],
           ),
         ],
       ),

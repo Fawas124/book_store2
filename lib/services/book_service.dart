@@ -78,6 +78,7 @@ class BookService with ChangeNotifier {
             isBestseller: false,
             rating: 0.0,
             reviewCount: 0,
+            releaseDate: DateTime.now(), // Added required parameter
           );
         }).toList();
       }
@@ -122,19 +123,19 @@ class BookService with ChangeNotifier {
   }
 
   List<Book> searchBooks(String query, {String searchType = 'title'}) {
-  return _books.where((book) {
-    switch (searchType) {
-      case 'author':
-        return book.author.toLowerCase().contains(query.toLowerCase());
-      case 'genre':
-        return book.genres.any((genre) => 
-          genre.toLowerCase().contains(query.toLowerCase()));
-      case 'title':
-      default:
-        return book.title.toLowerCase().contains(query.toLowerCase());
-    }
-  }).toList();
-}
+    return _books.where((book) {
+      switch (searchType) {
+        case 'author':
+          return book.author.toLowerCase().contains(query.toLowerCase());
+        case 'genre':
+          return book.genres.any(
+              (genre) => genre.toLowerCase().contains(query.toLowerCase()));
+        case 'title':
+        default:
+          return book.title.toLowerCase().contains(query.toLowerCase());
+      }
+    }).toList();
+  }
 
   void loadWishlist() {}
 }

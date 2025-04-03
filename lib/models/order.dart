@@ -99,6 +99,7 @@ class Order {
                 description: item['description'] ?? '',
                 genres: List<String>.from(item['genres'] ?? []),
                 publishDate: DateTime.tryParse(item['publishDate'] ?? '') ?? DateTime.now(),
+                releaseDate: DateTime.tryParse(item['releaseDate'] ?? '') ?? DateTime.now(),
                 isBestseller: item['isBestseller'] ?? false,
                 rating: (item['rating'] as num?)?.toDouble() ?? 0.0,
                 reviewCount: (item['reviewCount'] as num?)?.toInt() ?? 0,
