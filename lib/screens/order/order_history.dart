@@ -242,7 +242,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
   }
 
   bool _isStatusCompleted(models.Order order, models.DeliveryStatus status) {
-    final currentIndex = models.DeliveryStatus.values.indexOf(order.deliveryStatus as models.DeliveryStatus);
+    final currentIndex = models.DeliveryStatus.values.indexOf(order.deliveryStatus);
     final statusIndex = models.DeliveryStatus.values.indexOf(status);
     return statusIndex < currentIndex;
   }
