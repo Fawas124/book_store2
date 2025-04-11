@@ -32,28 +32,28 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   List<Book> _sortBooks(List<Book> books, String sortBy, bool ascending) {
     List<Book> sortedBooks = List.from(books);
-    
+
     switch (sortBy) {
       case 'price':
-        sortedBooks.sort((a, b) => ascending 
-            ? a.price.compareTo(b.price) 
+        sortedBooks.sort((a, b) => ascending
+            ? a.price.compareTo(b.price)
             : b.price.compareTo(a.price));
         break;
       case 'rating':
-        sortedBooks.sort((a, b) => ascending 
-            ? a.rating.compareTo(b.rating) 
+        sortedBooks.sort((a, b) => ascending
+            ? a.rating.compareTo(b.rating)
             : b.rating.compareTo(a.rating));
         break;
       case 'releaseDate':
-        sortedBooks.sort((a, b) => ascending 
-            ? a.publishDate.compareTo(b.publishDate) 
+        sortedBooks.sort((a, b) => ascending
+            ? a.publishDate.compareTo(b.publishDate)
             : b.publishDate.compareTo(a.publishDate));
         break;
       default:
         // No sorting
         break;
     }
-    
+
     return sortedBooks;
   }
 
@@ -68,7 +68,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
         const PopupMenuItem(value: 'none', child: Text('Default Order')),
         const PopupMenuItem(value: 'price', child: Text('Sort by Price')),
         const PopupMenuItem(value: 'rating', child: Text('Sort by Rating')),
-        const PopupMenuItem(value: 'releaseDate', child: Text('Sort by Release Date')),
+        const PopupMenuItem(
+            value: 'releaseDate', child: Text('Sort by Release Date')),
       ],
       onSelected: (value) {
         if (value == currentSortBy) {
@@ -174,14 +175,14 @@ class _ExploreScreenState extends State<ExploreScreen> {
   @override
   Widget build(BuildContext context) {
     final bookService = Provider.of<BookService>(context);
-    
+
     // Get and sort bestsellers
     final bestsellers = _sortBooks(
       bookService.books.where((b) => b.isBestseller).toList(),
       _bestsellerSortBy,
       _bestsellerAscending,
     );
-    
+
     // Get and sort new arrivals
     final newArrivals = _sortBooks(
       bookService.books
@@ -208,83 +209,95 @@ class _ExploreScreenState extends State<ExploreScreen> {
       ),
       body: bookService.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Search bar
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: GestureDetector(
-                      onTap: () => Navigator.pushNamed(context, '/search'),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        height: 50,
-                        child: const Row(
-                          children: [
-                            Icon(Icons.search),
-                            SizedBox(width: 8),
-                            Text('Search for books...'),
-                          ],
+          : Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/bg.jpg'),
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                    Colors.black.withOpacity(0.5),
+                    BlendMode.dstATop,
+                  ),
+                ),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Search bar
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: GestureDetector(
+                        onTap: () => Navigator.pushNamed(context, '/search'),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          height: 50,
+                          child: const Row(
+                            children: [
+                              Icon(Icons.search),
+                              SizedBox(width: 8),
+                              Text('Search for books...'),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
 
-                  // Genres Section
-                  _buildCategorySection(
-                    'Browse by Genre',
-                    allGenres,
-                    Icons.category,
-                  ),
+                    // Genres Section
+                    _buildCategorySection(
+                      'Browse by Genre',
+                      allGenres,
+                      Icons.category,
+                    ),
 
-                  // Authors Section
-                  _buildCategorySection(
-                    'Browse by Author',
-                    allAuthors,
-                    Icons.person,
-                  ),
+                    // Authors Section
+                    _buildCategorySection(
+                      'Browse by Author',
+                      allAuthors,
+                      Icons.person,
+                    ),
 
-                  // Best Selling Section with sorting
-                  SectionHeader(
-                    title: 'Best Selling Books',
-                    onSeeAll: () => _navigateToCategoryScreen(
-                      'Bestsellers',
-                      bestsellers,
+                    // Best Selling Section with sorting
+                    SectionHeader(
+                      title: 'Best Selling Books',
+                      onSeeAll: () => _navigateToCategoryScreen(
+                        'Bestsellers',
+                        bestsellers,
+                      ),
+                      trailing: _buildSortButton(
+                        _bestsellerSortBy,
+                        _bestsellerAscending,
+                        (value) => setState(() {
+                          _bestsellerSortBy = value;
+                          _bestsellerAscending = value != 'none';
+                        }),
+                      ),
                     ),
-                    trailing: _buildSortButton(
-                      _bestsellerSortBy,
-                      _bestsellerAscending,
-                      (value) => setState(() {
-                        _bestsellerSortBy = value;
-                        _bestsellerAscending = value != 'none';
-                      }),
-                    ),
-                  ),
-                  _buildBookList(bestsellers),
+                    _buildBookList(bestsellers),
 
-                  // New Arrivals Section with sorting
-                  SectionHeader(
-                    title: 'New Arrivals',
-                    onSeeAll: () => _navigateToCategoryScreen(
-                      'New Arrivals',
-                      newArrivals,
+                    // New Arrivals Section with sorting
+                    SectionHeader(
+                      title: 'New Arrivals',
+                      onSeeAll: () => _navigateToCategoryScreen(
+                        'New Arrivals',
+                        newArrivals,
+                      ),
+                      trailing: _buildSortButton(
+                        _newArrivalSortBy,
+                        _newArrivalAscending,
+                        (value) => setState(() {
+                          _newArrivalSortBy = value;
+                          _newArrivalAscending = value != 'none';
+                        }),
+                      ),
                     ),
-                    trailing: _buildSortButton(
-                      _newArrivalSortBy,
-                      _newArrivalAscending,
-                      (value) => setState(() {
-                        _newArrivalSortBy = value;
-                        _newArrivalAscending = value != 'none';
-                      }),
-                    ),
-                  ),
-                  _buildBookList(newArrivals),
-                ],
+                    _buildBookList(newArrivals),
+                  ],
+                ),
               ),
             ),
     );
