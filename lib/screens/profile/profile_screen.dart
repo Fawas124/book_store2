@@ -1,4 +1,5 @@
 import 'package:book_store_2/screens/order/order_history.dart';
+import 'package:book_store_2/screens/profile/theme_provider.dart';
 import 'package:book_store_2/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -11,6 +12,7 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
     final user = authService.user;
 
     return Scaffold(
@@ -73,7 +75,6 @@ class ProfileScreen extends StatelessWidget {
                     title: const Text('Settings'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () {
-                      // TODO: Navigate to settings screen
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -82,6 +83,17 @@ class ProfileScreen extends StatelessWidget {
                       );
                     },
                   ),
+                  const Divider(height: 1),
+                  // ListTile(
+                  //   leading: const Icon(Icons.color_lens),
+                  //   title: const Text('Dark Mode'),
+                  //   trailing: Switch(
+                  //     value: themeProvider.themeMode == ThemeMode.dark,
+                  //     onChanged: (value) {
+                  //       themeProvider.toggleTheme(value);
+                  //     },
+                  //   ),
+                  // ),
                 ],
               ),
             ),
